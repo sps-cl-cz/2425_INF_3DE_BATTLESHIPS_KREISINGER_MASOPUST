@@ -11,12 +11,14 @@ class BoardSetup:
     def __init__(self, rows: int, cols: int, ships_dict: dict[int, int]):
         """
         Initializes BoardSetup.
-
         :param rows: Number of rows in the board.
         :param cols: Number of columns in the board.
         :param ships_dict: Dictionary mapping ship_id -> count.
                            e.g. {1: 2, 2: 1, 3: 1, ...}
         """
+        rows = 5
+        cols = 5
+        
         # Tady si uložíme počet řádků, sloupců a lodí
         self.rows = rows
         self.cols = cols

@@ -1,3 +1,3 @@
 # Rozdělení bodů
-Jmeno Prijemni 100
-Jmeno Prijemni 100
+Jindřich Kreisinger 100
+Benjamin Masopust 100
