@@ -16,9 +16,6 @@ class BoardSetup:
         :param ships_dict: Dictionary mapping ship_id -> count.
                            e.g. {1: 2, 2: 1, 3: 1, ...}
         """
-        rows = 5
-        cols = 5
-        
         # Tady si uložíme počet řádků, sloupců a lodí
         self.rows = rows
         self.cols = cols
@@ -32,6 +29,7 @@ class BoardSetup:
         Returns the current 2D board state.
         0 = water, 1..7 = specific ship ID.
         """
+        return self.board
         raise NotImplementedError("get_board() is not implemented yet.")
 
     def get_tile(self, x: int, y: int) -> int:
@@ -42,6 +40,9 @@ class BoardSetup:
         Raises an IndexError if the coordinates are out of bounds.
         Note: x is column, y is row.
         """
+        if (x < 0 or x > self.cols) or (y < 0 or y > self.rows):
+            raise IndexError("Coordinates out of bounds.")  
+        return self.board[y][x]
         raise NotImplementedError("get_tile() is not implemented yet.")
 
     def place_ships(self) -> None:
@@ -53,6 +54,7 @@ class BoardSetup:
         - Cannot place ships with touching sides (diagonals are OK).
         - If it's impossible, raise ValueError.
         """
+        ShipsCount = sum(self.ships_dict.values())
         # Tady by se měla provést logika umisťování lodí
         raise NotImplementedError("place_ships() is not implemented yet.")
 
