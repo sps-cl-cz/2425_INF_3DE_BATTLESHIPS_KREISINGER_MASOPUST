@@ -1,3 +1,4 @@
+import random
 """
 board_setup.py
 
@@ -20,7 +21,7 @@ class BoardSetup:
         self.rows = rows
         self.cols = cols
         self.ships_dict = ships_dict
-        
+        self.total_blocks = rows * cols
         # Tady vytvoříme 2D pole pro board: 0 = voda, 1..7 = ID lodě (viz examples)
         self.board = [[0 for _ in range(cols)] for _ in range(rows)]
 
@@ -40,7 +41,7 @@ class BoardSetup:
         Raises an IndexError if the coordinates are out of bounds.
         Note: x is column, y is row.
         """
-        if (x < 0 or x > self.cols) or (y < 0 or y > self.rows):
+        if (x < 0 or x >= self.cols) or (y < 0 or y >= self.rows):
             raise IndexError("Coordinates out of bounds.")  
         return self.board[y][x]
         raise NotImplementedError("get_tile() is not implemented yet.")
@@ -54,8 +55,33 @@ class BoardSetup:
         - Cannot place ships with touching sides (diagonals are OK).
         - If it's impossible, raise ValueError.
         """
-        ShipsCount = sum(self.ships_dict.values())
         # Tady by se měla provést logika umisťování lodí
+        # find right bottom corner of the board
+        rightBottom = [self.cols - 1, self.rows - 1]
+        # find center of the board
+        center = [self.cols // 2, self.rows // 2]
+        for ship_id, count in self.ships_dict.items():  # Pro každý typ lodě (ID + počet lodí)
+            for _ in range(count):  # Opakuj tolikrát, kolik jich máme umístit     
+                method = random.randint(1, 1)
+                ship = list()
+                BoatCenter = [0, 0]
+                print(type(BoatCenter))
+                print(BoatCenter)
+                wholeBoardChecked = False
+                #create ship and place it on the board
+                if (ship_id == 1):    
+                    ship.append([BoatCenter])
+                    ship.append([BoatCenter[0], BoatCenter[1] + 1])
+                for _ in range(self.total_blocks):
+                    for Shipblocks in range(len(ship)):
+                        y, x = ship[Shipblocks]
+                        if (method == 1):
+                            if 0 <= x < self.cols and 0 <= y < self.rows and self.board[y][x] == 0:
+                                self.board[y][x] = ship_id
+                                
+
+            
+                
         raise NotImplementedError("place_ships() is not implemented yet.")
 
     def reset_board(self) -> None:
@@ -74,3 +100,8 @@ class BoardSetup:
         """
         # Tady spočítáme a vrátíme statistiky boardu
         raise NotImplementedError("board_stats() is not implemented yet.")
+
+board = BoardSetup(10, 10, {1: 2, 2: 1, 3: 1, 4: 1})
+
+board.place_ships()
+print(board.get_board())
