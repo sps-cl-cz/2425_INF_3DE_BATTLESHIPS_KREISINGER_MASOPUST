@@ -32,6 +32,7 @@ class Strategy:
         self.current_hits.append((x, y))
         
         if is_sunk:
+            self.mark_surrounding_cells()
             self.identify_sunk_ship()
             self.hit_queue.clear()
             self.current_hits.clear()
@@ -69,6 +70,15 @@ class Strategy:
             self.ships_dict[ship_size] -= 1
             if self.ships_dict[ship_size] == 0:
                 del self.ships_dict[ship_size]  # Odstraníme typ lodi, pokud už žádné nezbyly
+
+    def mark_surrounding_cells(self):
+        """ Po potopení lodi označí všechna sousední pole (kromě rohů) jako neplatná pro další střely. """
+        for x, y in self.current_hits:
+            for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+                cx, cy = x + dx, y + dy
+                if 0 <= cx < self.cols and 0 <= cy < self.rows and (cx, cy) not in self.shots_fired:
+                    self.missed_shots.add((cx, cy))
+                    self.enemy_board[cy][cx] = 'X'  # 'X' značí nemožné místo
     
     def get_enemy_board(self) -> list[list[str]]:
         return self.enemy_board
