@@ -10,6 +10,7 @@ class Strategy:
         self.missed_shots = set()
         self.hit_queue = []
         self.current_hits = []  # Ukládá souřadnice aktuálně zasažené lodi
+        self.available_shots = {(x, y) for x in range(cols) for y in range(rows)}
 
     def get_next_attack(self) -> tuple[int, int]:
         if self.hit_queue:
@@ -17,12 +18,13 @@ class Strategy:
         return self.get_random_shot()
 
     def get_random_shot(self):
-        available_shots = [(x, y) for x in range(self.cols) for y in range(self.rows)
-                           if (x, y) not in self.shots_fired and (x, y) not in self.missed_shots]
-        return random.choice(available_shots) if available_shots else None
+        if not self.available_shots:
+            return None
+        return random.choice(tuple(self.available_shots))
 
     def register_attack(self, x: int, y: int, is_hit: bool, is_sunk: bool) -> None:
         self.shots_fired.add((x, y))
+        self.available_shots.discard((x, y))
         self.enemy_board[y][x] = 'H' if is_hit else 'M'
         
         if not is_hit:
@@ -32,8 +34,8 @@ class Strategy:
         self.current_hits.append((x, y))
         
         if is_sunk:
-            self.mark_surrounding_cells()
             self.identify_sunk_ship()
+            self.mark_surrounding_cells()
             self.hit_queue.clear()
             self.current_hits.clear()
         else:
@@ -42,43 +44,34 @@ class Strategy:
     def get_adjacent_cells(self, x, y):
         candidates = [(x-1, y), (x+1, y), (x, y-1), (x, y+1)]
         return [(cx, cy) for cx, cy in candidates 
-                if 0 <= cx < self.cols and 0 <= cy < self.rows and (cx, cy) not in self.shots_fired]
+                if 0 <= cx < self.cols and 0 <= cy < self.rows and (cx, cy) in self.available_shots]
 
     def get_target_cells(self):
-        """ Analyzuje tvar zásahů a pokusí se určit další pravděpodobné cíle """
         if len(self.current_hits) == 1:
             return self.get_adjacent_cells(*self.current_hits[0])
         
-        # Rozpoznání směru lodi (horizontální / vertikální)
         xs, ys = zip(*self.current_hits)
         if len(set(xs)) == 1:
-            # Vertikální loď - rozšiřujeme nahoru/dolů
             min_y, max_y = min(ys), max(ys)
             targets = [(xs[0], min_y - 1), (xs[0], max_y + 1)]
         else:
-            # Horizontální loď - rozšiřujeme vlevo/vpravo
             min_x, max_x = min(xs), max(xs)
             targets = [(min_x - 1, ys[0]), (max_x + 1, ys[0])]
         
-        return [(cx, cy) for cx, cy in targets
-                if 0 <= cx < self.cols and 0 <= cy < self.rows and (cx, cy) not in self.shots_fired]
+        return [(cx, cy) for cx, cy in targets if (cx, cy) in self.available_shots]
     
     def identify_sunk_ship(self):
-        """ Při potopení lodi zjistí její délku a eliminuje ji z dostupných lodí. """
         ship_size = len(self.current_hits)
         if ship_size in self.ships_dict and self.ships_dict[ship_size] > 0:
             self.ships_dict[ship_size] -= 1
-            if self.ships_dict[ship_size] == 0:
-                del self.ships_dict[ship_size]  # Odstraníme typ lodi, pokud už žádné nezbyly
-
+    
     def mark_surrounding_cells(self):
-        """ Po potopení lodi označí všechna sousední pole (kromě rohů) jako neplatná pro další střely. """
         for x, y in self.current_hits:
-            for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
-                cx, cy = x + dx, y + dy
-                if 0 <= cx < self.cols and 0 <= cy < self.rows and (cx, cy) not in self.shots_fired:
-                    self.missed_shots.add((cx, cy))
-                    self.enemy_board[cy][cx] = 'X'  # 'X' značí nemožné místo
+            neighbors = [(x-1, y), (x+1, y), (x, y-1), (x, y+1)]
+            for nx, ny in neighbors:
+                if 0 <= nx < self.cols and 0 <= ny < self.rows:
+                    self.available_shots.discard((nx, ny))
+                    self.enemy_board[ny][nx] = 'M'
     
     def get_enemy_board(self) -> list[list[str]]:
         return self.enemy_board
