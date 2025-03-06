@@ -181,23 +181,24 @@ def find_l_ships(board: BoardSetup):
     Each offset is (dx, dy) where dx is column offset, dy is row offset.
     We'll keep it consistent with get_tile(x+dx, y+dy).
     """
+    
     found = []
     L_SHAPE_OFFSETS = [
         [(0, 0), (1, 0), (2, 0), (2, 1)],   # Standard L
-        [(0, 0), (0, 1), (0, 2), (1, 2)],   # Rotated 90°
-        [(0, 1), (1, 1), (2, 1), (2, 0)],   # Rotated 180°
-        [(1, 0), (1, 1), (1, 2), (0, 2)],   # Rotated 270°
-        [(0, 1), (0, 0), (1, 0), (2, 0)],   # Mirrored L
-        [(0, 0), (0, 1), (0, 2), (-1, 2)],  # Mirrored 90°
-        [(0, 0), (1, 0), (2, 0), (2, -1)],  # Mirrored 180°
-        [(1, 0), (1, 1), (1, 2), (2, 2)],   # Mirrored 270°
+        [(0, 0), (0, 1), (0, 2), (-1, 2)],   # Rotated 90°
+        [(0, 0), (0, 1), (1, 1), (2, 1)],   # Rotated 180°
+        [(0, 0), (-1, 0), (-1, 1), (-1, 2)],   # Rotated 270°
+        [(0, 0), (0, 1), (-1, 1), (-2, 1)],   # Mirrored L
+        [(0, 0), (1, 0), (1, 1), (1, 2)],  # Mirrored 90°
+        [(0, 0), (0, -1), (1, -1), (2, -1)],  # Mirrored 180°
+        [(0, 0), (0, 1), (0, 2), (1, 2)],   # Mirrored 270°
     ]
     for y in range(board.rows):
         for x in range(board.cols):
             for shape in L_SHAPE_OFFSETS:
                 try:
                     # check all squares in shape
-                    if all(board.get_tile(x + dx, y + dy) != 0 for (dx, dy) in shape):
+                    if all(board.get_tile(x + dx, y + dy) != 0 for (dy, dx) in shape):
                         found.append(((x, y), shape))
                 except IndexError:
                     continue
