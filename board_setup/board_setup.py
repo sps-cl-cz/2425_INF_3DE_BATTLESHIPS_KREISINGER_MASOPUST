@@ -90,7 +90,7 @@ class BoardSetup:
         for ship_id, count in self.ships_dict.items():
             for _ in range(count):
                 placed = False
-                attempts = 100
+                attempts = 2000
 
                 while not placed and attempts > 0:
                     x = random.randint(0, self.cols - 1)
