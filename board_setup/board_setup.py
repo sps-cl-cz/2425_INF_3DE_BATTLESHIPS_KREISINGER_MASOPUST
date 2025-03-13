@@ -55,6 +55,7 @@ class BoardSetup:
         - Ships cannot be placed with touching sides (diagonals are OK).
         - If it's impossible, raises ValueError.
         """
+
         shapes = {
             1: [(0, 0), (0, 1)],  # 2x1 loď
             2: [(0, 0), (0, 1), (0, 2)],  # 3x1 loď
@@ -72,7 +73,7 @@ class BoardSetup:
         def mirror(shape):
             """Mirrors the shape horizontally."""
             return [(dx, -dy) for dx, dy in shape]
-
+        attempts = 69000    
         def can_place_ship(x, y, ship_shape):
             for dx, dy in ship_shape:
                 nx, ny = x + dx, y + dy
@@ -80,26 +81,24 @@ class BoardSetup:
                     return False
                 if self.board[ny][nx] != 0:
                     return False
-                # Check adjacent tiles
                 for adj_x, adj_y in [(nx-1, ny), (nx+1, ny), (nx, ny-1), (nx, ny+1)]:
                     if 0 <= adj_x < self.cols and 0 <= adj_y < self.rows:
                         if self.board[adj_y][adj_x] != 0:
                             return False
             return True
-
+        
         for ship_id, count in self.ships_dict.items():
             for _ in range(count):
                 placed = False
-                attempts = 2000
+                failed_attempts_streak = 0
 
                 while not placed and attempts > 0:
                     x = random.randint(0, self.cols - 1)
                     y = random.randint(0, self.rows - 1)
                     ship_shape = shapes.get(ship_id, [(0, 0)])
 
-                    # Try all combinations of rotations and mirrors
-                    for _ in range(2):  # Try original and mirrored shape
-                        for _ in range(4):  # Try all 4 rotations
+                    for _ in range(2):
+                        for _ in range(4):
                             if can_place_ship(x, y, ship_shape):
                                 for dx, dy in ship_shape:
                                     self.board[y + dy][x + dx] = ship_id
@@ -109,8 +108,12 @@ class BoardSetup:
                         if placed:
                             break
                         ship_shape = mirror(ship_shape)
-
                     attempts -= 1
+                    failed_attempts_streak = failed_attempts_streak + 1 if not placed else 0
+                    if failed_attempts_streak > 1000:
+                        self.board = [[0 for _ in range(self.cols)] for _ in range(self.rows)]
+                        failed_attempts_streak = 0
+                        self.place_ships()
 
                 if not placed:
                     raise ValueError(f"Nepodařilo se umístit loď {ship_id}")
