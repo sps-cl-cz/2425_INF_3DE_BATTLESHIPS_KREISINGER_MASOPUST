@@ -73,7 +73,7 @@ class BoardSetup:
         def mirror(shape):
             """Mirrors the shape horizontally."""
             return [(dx, -dy) for dx, dy in shape]
-        attempts = 69000    
+
         def can_place_ship(x, y, ship_shape):
             for dx, dy in ship_shape:
                 nx, ny = x + dx, y + dy
@@ -86,7 +86,7 @@ class BoardSetup:
                         if self.board[adj_y][adj_x] != 0:
                             return False
             return True
-        
+        attempts = 69000    
         for ship_id, count in self.ships_dict.items():
             for _ in range(count):
                 placed = False
@@ -113,8 +113,6 @@ class BoardSetup:
                     if failed_attempts_streak > 1000:
                         self.board = [[0 for _ in range(self.cols)] for _ in range(self.rows)]
                         failed_attempts_streak = 0
-                        self.place_ships()
-
                 if not placed:
                     raise ValueError(f"Nepodařilo se umístit loď {ship_id}")
                 
@@ -141,3 +139,7 @@ class BoardSetup:
         }
         # Tady spočítáme a vrátíme statistiky boardu
         raise NotImplementedError("board_stats() is not implemented yet.")
+    
+boardsetup = BoardSetup(10, 10, {1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1})
+boardsetup.place_ships()
+print (boardsetup.get_board())
